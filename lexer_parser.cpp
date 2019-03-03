@@ -12,9 +12,11 @@
 
 const char one_word_actions[][50] = { "go","dance","look" }; //list of actions that need only one word after them
 const char two_word_actions[][50] = { "take" }; //list of actions that need one or more words after them
+const char exception_words[][50] = {"to","the","then","and"}; //list of exception words
 
 const int one_word_array_size = 3; //number of elements in the one_word_actions array
 const int two_word_array_size = 1; //number of elements in the two_word_actions array
+const int exception_words_array_size = 4;
 
 typedef struct words words;
 
@@ -55,23 +57,40 @@ int search_type(words* word){ //function that determines if an action needs 1 wo
 	
 }
 
+int check_if_exception_word(words* word){ //function that checks if a word is an exception and therefore needs to be removed
+
+	for(int i=0;i<exception_words_array_size;i++){
+		
+		if(strcmp(word->word,exception_words[i]) == 0)
+			return 1;
+		
+	}
+
+	return 0;
+
+}
+
 words* remove_exception_words(words* first_word){ //function that remove words that are not necessary for the parser
 	
 	words* t = first_word;
+	int is_exception;
+
+	is_exception = check_if_exception_word(first_word);
 	
-	while(strcmp(first_word->word,"to") == 0 || strcmp(first_word->word,"the") == 0 ||
-	strcmp(first_word->word,"then") == 0 || strcmp(first_word->word,"and") == 0){//if the exception word is in the first word
+	while(is_exception == 1){//if the exception word is in the first word
 		
 		first_word = t->next_word; //crush value of the first word
 		t = first_word;
-		
+		is_exception = check_if_exception_word(first_word);
+
 	}
 	
 	
 	while(t->next_word != NULL){ //if the next word is not null
+
+		is_exception = check_if_exception_word(t->next_word);
 		
-		if(strcmp(t->next_word->word,"to") == 0 || strcmp(t->next_word->word,"the") == 0
-		  || strcmp(t->next_word->word,"then") == 0 || strcmp(t->next_word->word,"and") == 0){ //if the next word is equal to an exception
+		if(is_exception == 1){ //if the next word is equal to an exception
 			
 			t->next_word = t->next_word->next_word; //we crush the next word's value by the word after it (exp: "go to left" => "go left")
 			
@@ -246,7 +265,7 @@ void clean_words(words* first_word){ //function that optimises our application b
 	
 }
 
-tokens* lexer(char phrase[150]){
+tokens* lexer(char phrase[300]){
 	
 	int i=0;
     words* first_word = (words*)malloc(sizeof(words));
@@ -290,7 +309,7 @@ tokens* lexer(char phrase[150]){
 	first_token->next_token = NULL;
 	first_token = make_tokens(first_token,first_word); //we transform our words into tokens
 	
-	clean_words(first_word);
+	clean_words(first_word); //remove the words typed from the memory
 	
 	tokens* k = first_token;
 	
@@ -317,7 +336,7 @@ tokens* lexer(char phrase[150]){
 char* parser(tokens* first_token){
 	
 	tokens* t = first_token;
-	char result[150]=""; //the result we are gonna show to the player
+	char result[300]=""; //the result we are gonna show to the player
 	int first = 0;
 	
 	if(strcmp(t->words_association[0],"Error") == 0){
@@ -375,14 +394,13 @@ char* parser(tokens* first_token){
 				strcat(result,t->words_association[1]);
 				strcat(result,". ");
 				
-				
 			}
-			first++;
+			first++; //checks that this is not the first action done by the user
 			t = t->next_token;
 			
 		}
 		
-		if(strcmp(result,"") == 0)
+		if(strcmp(result,"") == 0)//if the user didn't type any known action 
 			strcpy(result,"What the hell are you trying to do ?");
 			
 	}
@@ -393,9 +411,9 @@ char* parser(tokens* first_token){
 
 int main()
 {
-    char phrase[150];
+    char phrase[300];
     tokens* first_token;
-    char response[150]="";
+    char response[300]="";
 	
 	printf("What do you want to do ? ");
 	gets(phrase);
@@ -413,4 +431,3 @@ int main()
 
     return 0;
 }
-
