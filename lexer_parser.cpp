@@ -11,16 +11,16 @@
 #include <string.h>
 
 const char one_word_actions[][50] = { "go","dance","look" }; //list of actions that need only one word after them
-const char two_word_actions[][50] = { "take" }; //list of actions that need one or more words after them
+const char two_word_actions[][50] = { "take","get" }; //list of actions that need one or more words after them
 
-const char two_word_actions_needed_word[][50] = {"from"}; //list of the words needed for the second part of the action to happen
+const char two_word_actions_needed_word[][50] = {"from","from"}; //list of the words needed for the second part of the action to happen
                                                           //exemple : "take" needs the word "from" (Note: The word and the action need to have the
                                                           //same index in their respective array exemple("take" is index 0 and "from" is index 0)
 
 const char exception_words[][50] = {"to","the","then","and"}; //list of exception words
 
 const int one_word_array_size = 3; //number of elements in the one_word_actions array
-const int two_word_array_size = 1; //number of elements in the two_word_actions array
+const int two_word_array_size = 2; //number of elements in the two_word_actions array
 const int exception_words_array_size = 4; //number of elements in the exception_words array
 
 typedef struct words words;
@@ -89,6 +89,35 @@ const char* get_needed_word(words* word){ //function that gets the word needed f
 	}
 
 	return two_word_actions_needed_word[index];
+
+}
+
+char* remove_spaces(char phrase[300]){ //removing the spaces from the beginning of the phrase
+
+    int index, i, j;
+
+    index = 0;
+
+    /* Find last index of whitespace character */
+    while(phrase[index] == ' ' || phrase[index] == '\t' || phrase[index] == '\n')
+    {
+        index++;
+    }
+
+
+    if(index != 0)
+    {
+        /* Shift all trailing characters to its left */
+        i = 0;
+        while(phrase[i + index] != '\0')
+        {
+            phrase[i] = phrase[i + index];
+            i++;
+        }
+        phrase[i] = '\0'; // Make sure that string is NULL terminated
+    }
+
+    return phrase;
 
 }
 
@@ -185,7 +214,8 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 			if(t->next_word != NULL){
 				strcpy(current_token->words_association[1],t->next_word->word);//we copy the word after it in the token because go
 	 			current_token->number_of_words = 2;		  					   //has only one word needed to function
-	 		}else{ // if the user didn"t enter something to do with an action exp("go" with nothing else)
+
+	 		}else{ // if the user didn't enter something to do with an action exp("go" with nothing else)
 
 				strcpy(first_token->words_association[0],"");
 				strcpy(first_token->words_association[0],"Error");
@@ -292,6 +322,18 @@ void clean_words(words* first_word){ //function that optimises our application b
 
 tokens* lexer(char phrase[300]){
 
+    strcpy(phrase,remove_spaces(phrase));
+
+    if(strcmp(phrase,"") == 0){ //if the user didn't type anything
+
+        tokens* first_token = (tokens*)malloc(sizeof(tokens)); //we set our first token
+        strcpy(first_token->words_association[0],"Empty");
+        first_token->next_token = NULL;
+
+        return first_token;
+
+    }
+
 	int i=0;
     words* first_word = (words*)malloc(sizeof(words));
     first_word->next_word = NULL;
@@ -368,6 +410,10 @@ void parser(tokens* first_token){
 
 		strcpy(result,"You need to specify something to do with the action !");
 
+	 }else if(strcmp(t->words_association[0],"Empty") == 0){ //if there is an error in one of the actions
+
+        strcpy(result,"You need to put some actions in order for me to help you !");
+
 	 }else{
 
 		while(t != NULL){
@@ -375,9 +421,9 @@ void parser(tokens* first_token){
 			if(strcmp(t->words_association[0],"go") == 0){ //if the word is go
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna go ");
+					strcat(result,"Oh you wanna go to the ");
 				else
-					strcat(result,"And then go ");
+					strcat(result,"And then go to the ");
 
 				strcat(result,t->words_association[1]);
 				strcat(result,". ");
@@ -398,6 +444,28 @@ void parser(tokens* first_token){
 					strcat(result,"Oh you wanna take the ");
 				else
 					strcat(result,"And then take the ");
+
+				strcat(result,t->words_association[1]);
+				strcat(result," from the ");
+				strcat(result,t->words_association[3]);
+				strcat(result,". ");
+
+			}else if(strcmp(t->words_association[0],"get") == 0 && t->number_of_words == 2){ //if the action is get without a from
+
+				if(first == 0) //if this is the first action of the list
+					strcat(result,"Oh you wanna get the ");
+				else
+					strcat(result,"And then get the ");
+
+				strcat(result,t->words_association[1]);
+				strcat(result,". ");
+
+			}else if(strcmp(t->words_association[0],"get") == 0 && t->number_of_words == 4){ //if the action is get with from
+
+				if(first == 0) //if this is the first action of the list
+					strcat(result,"Oh you wanna get the ");
+				else
+					strcat(result,"And then get the ");
 
 				strcat(result,t->words_association[1]);
 				strcat(result," from the ");
