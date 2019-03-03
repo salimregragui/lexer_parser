@@ -12,11 +12,16 @@
 
 const char one_word_actions[][50] = { "go","dance","look" }; //list of actions that need only one word after them
 const char two_word_actions[][50] = { "take" }; //list of actions that need one or more words after them
+
+const char two_word_actions_needed_word[][50] = {"from"}; //list of the words needed for the second part of the action to happen
+                                                          //exemple : "take" needs the word "from" (Note: The word and the action need to have the
+                                                          //same index in their respective array exemple("take" is index 0 and "from" is index 0)
+
 const char exception_words[][50] = {"to","the","then","and"}; //list of exception words
 
 const int one_word_array_size = 3; //number of elements in the one_word_actions array
 const int two_word_array_size = 1; //number of elements in the two_word_actions array
-const int exception_words_array_size = 4;
+const int exception_words_array_size = 4; //number of elements in the exception_words array
 
 typedef struct words words;
 
@@ -67,6 +72,23 @@ int check_if_exception_word(words* word){ //function that checks if a word is an
 	}
 
 	return 0;
+
+}
+
+const char* get_needed_word(words* word){ //function that gets the word needed for the second part of a two_words action to work
+
+    int index = 0;
+
+    for(int j=0;j<two_word_array_size;j++){
+
+		if(strcmp(word->word,two_word_actions[j]) == 0){
+			index = j;
+			break;
+		}
+
+	}
+
+	return two_word_actions_needed_word[index];
 
 }
 
@@ -157,6 +179,9 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 			strcpy(current_token->words_association[0],t->word); //we copy the word in the current token
 
+			char needed_word[50] = "";
+			strcpy(needed_word,get_needed_word(t)); //the word needed for the second part of the action to happen
+
 			if(t->next_word != NULL){
 				strcpy(current_token->words_association[1],t->next_word->word);//we copy the word after it in the token because go
 	 			current_token->number_of_words = 2;		  					   //has only one word needed to function
@@ -172,7 +197,7 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 			if(t->next_word->next_word != NULL){ //if there is a word after the item to pick (exp take sword from ground)
 
-				if(strcmp(t->next_word->next_word->word,"from") == 0){ //if there is a place from where to pick
+				if(strcmp(t->next_word->next_word->word,needed_word) == 0){ //if there is a word that specifies the second portion of the action
 
 
 					if(t->next_word->next_word->next_word != NULL){
@@ -339,7 +364,7 @@ void parser(tokens* first_token){
 	char result[300]=""; //the result we are gonna show to the player
 	int first = 0;
 
-	if(strcmp(t->words_association[0],"Error") == 0){
+	if(strcmp(t->words_association[0],"Error") == 0){ //if there is an error in one of the actions
 
 		strcpy(result,"You need to specify something to do with the action !");
 
@@ -349,7 +374,7 @@ void parser(tokens* first_token){
 
 			if(strcmp(t->words_association[0],"go") == 0){ //if the word is go
 
-				if(first == 0)
+				if(first == 0) //if this is the first action of the list
 					strcat(result,"Oh you wanna go ");
 				else
 					strcat(result,"And then go ");
@@ -359,7 +384,7 @@ void parser(tokens* first_token){
 
 			}else if(strcmp(t->words_association[0],"take") == 0 && t->number_of_words == 2){ //if the action is take without a from
 
-				if(first == 0)
+				if(first == 0) //if this is the first action of the list
 					strcat(result,"Oh you wanna take the ");
 				else
 					strcat(result,"And then take the ");
@@ -369,7 +394,7 @@ void parser(tokens* first_token){
 
 			}else if(strcmp(t->words_association[0],"take") == 0 && t->number_of_words == 4){ //if the action is take with from
 
-				if(first == 0)
+				if(first == 0) //if this is the first action of the list
 					strcat(result,"Oh you wanna take the ");
 				else
 					strcat(result,"And then take the ");
@@ -381,7 +406,7 @@ void parser(tokens* first_token){
 
 			}else if(strcmp(t->words_association[0],"dance") == 0){ //if the action is dance
 
-				if(first == 0)
+				if(first == 0) //if this is the first action of the list
 					strcat(result,"Oh you wanna dance the ");
 				else
 					strcat(result,"And then dance the ");
@@ -391,7 +416,7 @@ void parser(tokens* first_token){
 
 			}else if(strcmp(t->words_association[0],"look") == 0){
 
-				if(first == 0)
+				if(first == 0) //if this is the first action of the list
 					strcat(result,"Oh you wanna look ");
 				else
 					strcat(result,"And then look ");
