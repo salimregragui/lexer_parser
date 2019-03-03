@@ -158,13 +158,18 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 	words* t = first_word;
 	tokens* current_token = first_token;
+
 	int word_type = 0;
+	int one_action_at_least = 0; //checks if the phrase entered by the user contains at least one action.
 
 	while(t != NULL){ //while the current word is not null
 
 		word_type = search_type(t); //we determine in wich action array the word is or if it's in none
 
 		if(word_type == 1){ //if the current word is an action that needs only one parameter
+
+            one_action_at_least++; //the phrase contains an action
+
 			if(t->next_word != NULL){ //if there is something to do with this action
 
 				strcpy(current_token->words_association[0],t->word); //we copy the word in the current token
@@ -183,7 +188,7 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 					current_token->next_token = new_token; //we set the current tokens next token to the new token
 					current_token = new_token; // and then we set the current token to the new token
 
-					t = t->next_word->next_word;
+					t = t = t->next_word;
 
 				}else{ // if the word after the association is null exp(we have "go left" after this association is nothing so
 					  //we set the pointer of new_token to null
@@ -205,6 +210,8 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 			}
 		}else if(word_type == 2){//if the current word is an action that needs one or more parameters
+
+		    one_action_at_least++; //the phrase contains an action
 
 			strcpy(current_token->words_association[0],t->word); //we copy the word in the current token
 
@@ -246,9 +253,9 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 								current_token->next_token = new_token; //we set the current tokens next token to the new token
 								current_token = new_token; // and then we set the current token to the new token
 
-								t = t->next_word->next_word->next_word->next_word;
+								t = t->next_word;
 
-							}else{ // if the word after the association is null exp(we have "take sword from ground" after
+							}else{ // if the word after the association is null exemple(we have "take sword from ground" after
 								  //this association there is no word so we set the pointer of next_token to null
 								current_token->next_token = NULL; //we set the current tokens next token to NULL as it is the last word in the phrase
 
@@ -257,27 +264,27 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 							}
 
 
-					}else{ //if the user specified from but without the place after it exp("take sword from" with nothing else
+					}else{ //if the user specified the needed word but without something after it exp("take sword from" with nothing else)
 
 						current_token->next_token = NULL; //we set the current tokens next token to NULL as it is the last word in the phrase
 
 						return first_token; //we return the first token
 
 					}
-			}else{ //if the word after the association (take/object) is not from
+			}else{ //if the word after the association (two_word_action/object) is not the needed word
 				tokens* new_token; //We create a new token for the next association of words
 
-				if(t->next_word->next_word->next_word != NULL){
+				if(t->next_word->next_word->next_word != NULL){//there is something after what we do
 
 					new_token = (tokens*)malloc(sizeof(tokens)); //we create a new token
 					new_token->next_token = NULL;
 
-					t = t->next_word->next_word;
+					t = t->next_word;
 
 				}else{
 
 					new_token = NULL;
-					t = t->next_word->next_word;
+					t = t->next_word;
 
 				}
 
@@ -303,7 +310,18 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 	}
 
-	return first_token; //we return the first token of our list
+	if(one_action_at_least > 0) //if the phrase contained at least one action
+        return first_token; //we return the first token of our list
+
+    else{ //if the user typed some gibberish without a single action
+
+        printf("%s  |",current_token->words_association[0]);
+        strcpy(first_token->words_association[0],"I don't understand");
+        first_token->next_token = NULL;
+
+        return first_token;
+
+    }
 
 }
 
@@ -381,18 +399,33 @@ tokens* lexer(char phrase[300]){
 	tokens* k = first_token;
 
 	int d=0;
+	int action_counter = 1;
 
+    printf("\n\nLIST OF ACTIONS THAT THE LEXER FOUND :\n");
 	while(k != NULL){
-		printf("\n\" ");
+		printf("\n\tAction %d : \" ",action_counter);
 
-		while(d < k->number_of_words){
+		if(strcmp(first_token->words_association[0],"I don't understand") == 0 || strcmp(first_token->words_association[0],"Error") == 0 ||
+            strcmp(first_token->words_association[0],"Empty") == 0){ //if the user typed some gibberish that the parser don't understand
 
-			printf("%s ",k->words_association[d]);
-			d++;
+            printf("%s \"\n",first_token->words_association[0]);
+            k = k->next_token;
+            break;
+
+		}else{ //if there is atleast one action in the phrase
+
+            while(d < k->number_of_words){
+
+                printf("%s ",k->words_association[d]);
+                d++;
+            }
+            k = k->next_token;
+            printf("\"\n");
+            d=0;
+
 		}
-		printf("\"\n");
-		k = k->next_token;
-		d=0;
+
+		action_counter++; //add's one to the actions found in the phrase
 
 	}
 
@@ -403,16 +436,19 @@ tokens* lexer(char phrase[300]){
 void parser(tokens* first_token){
 
 	tokens* t = first_token;
-	char result[300]=""; //the result we are gonna show to the player
 	int first = 0;
 
 	if(strcmp(t->words_association[0],"Error") == 0){ //if there is an error in one of the actions
 
-		strcpy(result,"You need to specify something to do with the action !");
+		printf("\t- You need to specify something to do with the action !\n");
 
 	 }else if(strcmp(t->words_association[0],"Empty") == 0){ //if there is an error in one of the actions
 
-        strcpy(result,"You need to put some actions in order for me to help you !");
+        printf("\t- You need to put some actions in order for me to help you !\n");
+
+	 }else if(strcmp(t->words_association[0],"I don't understand") == 0){ //if the parser didn't understand what the user wants to do
+
+        printf("\t- I'm sorry but i don't understand what you're trying to do !\n");
 
 	 }else{
 
@@ -421,76 +457,76 @@ void parser(tokens* first_token){
 			if(strcmp(t->words_association[0],"go") == 0){ //if the word is go
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna go to the ");
+					printf("\t- You wanna go to the ");
 				else
-					strcat(result,"And then go to the ");
+					printf("\t- Then go to the ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(".\n ");
 
 			}else if(strcmp(t->words_association[0],"take") == 0 && t->number_of_words == 2){ //if the action is take without a from
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna take the ");
+					printf("\t- You wanna take the ");
 				else
-					strcat(result,"And then take the ");
+					printf("\t- Then take the ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(". \n");
 
 			}else if(strcmp(t->words_association[0],"take") == 0 && t->number_of_words == 4){ //if the action is take with from
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna take the ");
+					printf("\t- You wanna take the ");
 				else
-					strcat(result,"And then take the ");
+					printf("\t- Then take the ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result," from the ");
-				strcat(result,t->words_association[3]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(" from the ");
+				printf("%s",t->words_association[3]);
+				printf(". \n");
 
 			}else if(strcmp(t->words_association[0],"get") == 0 && t->number_of_words == 2){ //if the action is get without a from
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna get the ");
+					printf("\t- You wanna get the ");
 				else
-					strcat(result,"And then get the ");
+					printf("\t- Then get the ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(". \n");
 
 			}else if(strcmp(t->words_association[0],"get") == 0 && t->number_of_words == 4){ //if the action is get with from
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna get the ");
+					printf("\t- You wanna get the ");
 				else
-					strcat(result,"And then get the ");
+					printf("\t- Then get the ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result," from the ");
-				strcat(result,t->words_association[3]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(" from the ");
+				printf("%s",t->words_association[3]);
+				printf(". \n");
 
 			}else if(strcmp(t->words_association[0],"dance") == 0){ //if the action is dance
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna dance the ");
+					printf("\t- You wanna dance the ");
 				else
-					strcat(result,"And then dance the ");
+					printf("\t- Then dance the ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(". \n");
 
 			}else if(strcmp(t->words_association[0],"look") == 0){
 
 				if(first == 0) //if this is the first action of the list
-					strcat(result,"Oh you wanna look ");
+					printf("\t- You wanna look ");
 				else
-					strcat(result,"And then look ");
+					printf("\t- Then look ");
 
-				strcat(result,t->words_association[1]);
-				strcat(result,". ");
+				printf("%s",t->words_association[1]);
+				printf(". \n");
 
 			}
 			first++; //checks that this is not the first action done by the user
@@ -498,12 +534,7 @@ void parser(tokens* first_token){
 
 		}
 
-		if(strcmp(result,"") == 0)//if the user didn't type any known action
-			strcpy(result,"What the hell are you trying to do ?");
-
 	}
-
-	puts(result);
 
 }
 
@@ -515,13 +546,13 @@ int main()
 	printf("What do you want to do ? ");
 	gets(phrase);
     first_token = lexer(phrase);
-    printf("\n\nRESPONSE : ");
+    printf("\nRESPONSE OF THE PARSER : \n\n");
     parser(first_token);
 
     printf("\nWhat do you want to do ? ");
 	gets(phrase);
     first_token = lexer(phrase);
-    printf("\nRESPONSE : ");
+    printf("\nRESPONSE OF THE PARSER : \n\n");
     parser(first_token);
 
     return 0;
