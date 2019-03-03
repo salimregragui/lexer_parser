@@ -338,6 +338,19 @@ void clean_words(words* first_word){ //function that optimises our application b
 
 }
 
+void clean_tokens(tokens* first_token){ //function that optimises our application by clearing the memory from the used tokens
+
+    tokens* t = first_token;
+
+	while(t != NULL){
+
+		free(t); //Release the memory used
+		t = t->next_token;
+
+	}
+
+}
+
 tokens* lexer(char phrase[300]){
 
     strcpy(phrase,remove_spaces(phrase));
@@ -436,8 +449,7 @@ tokens* lexer(char phrase[300]){
 void parser(tokens* first_token){
 
 	tokens* t = first_token;
-	int first = 0;
-
+	int first = 0; //if it's the first action (only needed for better text output
 	if(strcmp(t->words_association[0],"Error") == 0){ //if there is an error in one of the actions
 
 		printf("\t- You need to specify something to do with the action !\n");
@@ -459,7 +471,7 @@ void parser(tokens* first_token){
 				if(first == 0) //if this is the first action of the list
 					printf("\t- You wanna go to the ");
 				else
-					printf("\t- Then go to the ");
+					printf("\t- After that go to the ");
 
 				printf("%s",t->words_association[1]);
 				printf(".\n ");
@@ -469,7 +481,7 @@ void parser(tokens* first_token){
 				if(first == 0) //if this is the first action of the list
 					printf("\t- You wanna take the ");
 				else
-					printf("\t- Then take the ");
+					printf("\t- After that take the ");
 
 				printf("%s",t->words_association[1]);
 				printf(". \n");
@@ -491,7 +503,7 @@ void parser(tokens* first_token){
 				if(first == 0) //if this is the first action of the list
 					printf("\t- You wanna get the ");
 				else
-					printf("\t- Then get the ");
+					printf("\t- After that get the ");
 
 				printf("%s",t->words_association[1]);
 				printf(". \n");
@@ -501,7 +513,7 @@ void parser(tokens* first_token){
 				if(first == 0) //if this is the first action of the list
 					printf("\t- You wanna get the ");
 				else
-					printf("\t- Then get the ");
+					printf("\t- After that get the ");
 
 				printf("%s",t->words_association[1]);
 				printf(" from the ");
@@ -513,7 +525,7 @@ void parser(tokens* first_token){
 				if(first == 0) //if this is the first action of the list
 					printf("\t- You wanna dance the ");
 				else
-					printf("\t- Then dance the ");
+					printf("\t- After that dance the ");
 
 				printf("%s",t->words_association[1]);
 				printf(". \n");
@@ -523,7 +535,7 @@ void parser(tokens* first_token){
 				if(first == 0) //if this is the first action of the list
 					printf("\t- You wanna look ");
 				else
-					printf("\t- Then look ");
+					printf("\t- After that look ");
 
 				printf("%s",t->words_association[1]);
 				printf(". \n");
@@ -535,6 +547,8 @@ void parser(tokens* first_token){
 		}
 
 	}
+
+	clean_tokens(first_token);
 
 }
 
