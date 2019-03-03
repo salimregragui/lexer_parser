@@ -428,7 +428,7 @@ int main()
     printf("\nWhat do you want to do ? ");
 	gets(phrase);
     first_token = lexer(phrase);
-    printf("\n\nRESPONSE : ");
+    printf("\nRESPONSE : ");
     parser(first_token);
 
     return 0;
