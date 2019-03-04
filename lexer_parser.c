@@ -121,6 +121,24 @@ char* remove_spaces(char phrase[300]){ //removing the spaces from the beginning 
 
 }
 
+void show_list_of_actions(){ //function that shows all the actions that the user can do
+
+    printf("\nHERE IS A LIST OF ALL THE ACTIONS AVAILABLE : \n");
+
+    for(int i=0;i<one_word_array_size;i++){
+
+		printf("\t%s\n",one_word_actions[i]);
+
+	}
+
+	for(int j=0;j<two_word_array_size;j++){
+
+		printf("\t%s\n",two_word_actions[j]);
+
+	}
+
+}
+
 words* remove_exception_words(words* first_word){ //function that remove words that are not necessary for the parser
 
 	words* t = first_word;
@@ -158,6 +176,34 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 	words* t = first_word;
 	tokens* current_token = first_token;
+
+	if(strcmp(first_word->word,"ls") == 0 || strcmp(first_word->word,"list") == 0 ){ //if the user types the word ls or list
+
+        strcpy(first_token->words_association[0],"list");
+        first_token->next_token = NULL;
+
+        return first_token;
+
+	}else if(strcmp(first_word->word,"help") == 0){ //if the user types help
+        if(first_word->next_word != NULL){ //if he types an action after help exemple ("help go")
+                    printf("%s ok ok",first_word->word);
+            strcpy(first_token->words_association[0],"help");
+            strcpy(first_token->words_association[1],first_word->next_word->word);
+            first_token->next_token = NULL;
+
+            return first_token;
+
+        }else{
+
+            strcpy(first_token->words_association[0],"help");
+            strcpy(first_token->words_association[1],"");
+            first_token->next_token = NULL;
+
+            return first_token;
+
+        }
+
+	}
 
 	int word_type = 0;
 	int one_action_at_least = 0; //checks if the phrase entered by the user contains at least one action.
@@ -419,7 +465,8 @@ tokens* lexer(char phrase[300]){
 		printf("\n\tAction %d : \" ",action_counter);
 
 		if(strcmp(first_token->words_association[0],"I don't understand") == 0 || strcmp(first_token->words_association[0],"Error") == 0 ||
-            strcmp(first_token->words_association[0],"Empty") == 0){ //if the user typed some gibberish that the parser don't understand
+            strcmp(first_token->words_association[0],"Empty") == 0 || strcmp(first_token->words_association[0],"list") == 0
+            || strcmp(first_token->words_association[0],"help") == 0){ //if the user typed some gibberish that the parser don't understand
 
             printf("%s \"\n",first_token->words_association[0]);
             k = k->next_token;
@@ -462,7 +509,39 @@ void parser(tokens* first_token){
 
         printf("\t- I'm sorry but i don't understand what you're trying to do !\n");
 
-	 }else{
+	 }else if(strcmp(t->words_association[0],"list") == 0){ //if the user wanted to see the list of actions available
+
+        show_list_of_actions();
+
+	 }else if(strcmp(t->words_association[0],"help") == 0){ //if the user wanted to see help
+
+        if(strcmp(t->words_association[1],"") == 0){ //if the user typed help with nothing else
+
+            printf("\thelp : This function gives you information on how to use an action.");
+            printf("\t\t- how to use : help 'action' (exemple : help go)\n");
+
+        }else{
+
+            int word_type = search_type(t->words_association[1]); //check if the word after help is an action.
+
+            if(word_type == 0){ //if the word after help is not an action
+
+                printf("\thelp : I'm sorry but this action is unknown to me right now.\n");
+
+            }else{
+
+                if(strcmp(t->words_association[1],"go") == 0){
+
+                    printf("\n\tgo : This action allows you to go to a certain place or direction.");
+                    printf("\t\t- how to use : go 'place' (exemple : go left)\n");
+
+                }
+
+            }
+
+        }
+
+     }else{
 
 		while(t != NULL){
 
@@ -563,6 +642,8 @@ int main()
     printf("\nRESPONSE OF THE PARSER : \n\n");
     parser(first_token);
 
+    getchar();
+    system("cls");
     printf("\nWhat do you want to do ? ");
 	gets(phrase);
     first_token = lexer(phrase);
