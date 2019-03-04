@@ -19,3 +19,20 @@
 1551714499 source:c:\users\salim\desktop\lexer_and_parser\main.c
 	"lexer.h"
 
+1551714823 source:c:\users\salim\desktop\lexer_parser\main.c
+	"lexer.c"
+	"parser.c"
+
+1551716691 c:\users\salim\desktop\lexer_parser\lexer.c
+	"lexer.h"
+
+1551714496 c:\users\salim\desktop\lexer_parser\lexer.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"constants.h"
+
+1551714428 c:\users\salim\desktop\lexer_parser\constants.h
+
+1551716199 c:\users\salim\desktop\lexer_parser\parser.c
+

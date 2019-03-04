@@ -196,9 +196,10 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 			}else{ // if the user didn"t enter something to do with an action exp("go" with nothing else)
 
-				strcpy(first_token->words_association[0],"");
-				strcpy(first_token->words_association[0],"Error");
-				first_token->next_token = NULL;
+				strcpy(current_token->words_association[0],"");
+				strcpy(current_token->words_association[0],"Error");
+				strcpy(current_token->words_association[1],t->word);
+				current_token->next_token = NULL;
 
 				return first_token;
 
@@ -218,9 +219,10 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 	 		}else{ // if the user didn't enter something to do with an action exp("go" with nothing else)
 
-				strcpy(first_token->words_association[0],"");
-				strcpy(first_token->words_association[0],"Error");
-				first_token->next_token = NULL;
+				strcpy(current_token->words_association[0],"");
+				strcpy(current_token->words_association[0],"Error");
+				strcpy(current_token->words_association[1],t->word);
+				current_token->next_token = NULL;
 
 				return first_token;
 
@@ -268,7 +270,7 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 			}else{ //if the word after the association (two_word_action/object) is not the needed word
 				tokens* new_token; //We create a new token for the next association of words
 
-				if(t->next_word->next_word->next_word != NULL){//there is something after what we do
+				if(t->next_word->next_word != NULL){//there is something after what we do
 
 					new_token = (tokens*)malloc(sizeof(tokens)); //we create a new token
 					new_token->next_token = NULL;
@@ -298,7 +300,13 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
 		}else{
 
-			t = t->next_word;
+			if(t->next_word != NULL)
+                t = t->next_word;
+            else{
+
+                break;
+
+            }
 
 		}
 
@@ -309,7 +317,6 @@ tokens* make_tokens(tokens* first_token,words* first_word){ //function that join
 
     else{ //if the user typed some gibberish without a single action
 
-        printf("%s  |",current_token->words_association[0]);
         strcpy(first_token->words_association[0],"I don't understand");
         first_token->next_token = NULL;
 
@@ -414,7 +421,7 @@ tokens* lexer(char phrase[300]){
 
 	tokens* k = first_token;
 
-	int d=0;
+	/*int d=0;
 	int action_counter = 1;
 
     printf("\n\nLIST OF ACTIONS THAT THE LEXER FOUND :\n");
@@ -444,7 +451,7 @@ tokens* lexer(char phrase[300]){
 
 		action_counter++; //add's one to the actions found in the phrase
 
-	}
+	}*/
 
     return first_token; //returns the first word of the list
 

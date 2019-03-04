@@ -20,11 +20,8 @@ void parser(tokens* first_token){
 
 	tokens* t = first_token;
 	int first = 0; //if it's the first action (only needed for better text output
-	if(strcmp(t->words_association[0],"Error") == 0){ //if there is an error in one of the actions
 
-		printf("\t- You need to specify something to do with the action !\n");
-
-	 }else if(strcmp(t->words_association[0],"Empty") == 0){ //if there is an error in one of the actions
+    if(strcmp(t->words_association[0],"Empty") == 0){ //if there is an error in one of the actions
 
         printf("\t- You need to put some actions in order for me to help you !\n");
 
@@ -142,7 +139,11 @@ void parser(tokens* first_token){
 				printf("%s",t->words_association[1]);
 				printf(". \n");
 
-			}
+			}else if(strcmp(t->words_association[0],"Error") == 0){ //if there is an error in one of the actions
+
+                printf("\t- You didn't specify what you wanted to do with the action \"%s\" so i couldn't execute it.\n",t->words_association[1]);
+
+            }
 			first++; //checks that this is not the first action done by the user
 			t = t->next_token;
 
