@@ -146,14 +146,22 @@ words* remove_exception_words(words* first_word){ //function that remove words t
 
 	is_exception = check_if_exception_word(first_word);
 
-	while(is_exception == 1){//if the exception word is in the first word
+	while(is_exception == 1 && t != NULL){//if the exception word is in the first word
 
 		first_word = t->next_word; //crush value of the first word
 		t = first_word;
-		is_exception = check_if_exception_word(first_word);
+
+		if(t != NULL) //check if the word is exception only if there is a word left to analyse
+            is_exception = check_if_exception_word(first_word);
 
 	}
 
+    if(t == NULL){ //if there are no words left to check meaning that the string is now empty.
+
+        first_word = NULL;
+        return first_word;
+
+    }
 
 	while(t->next_word != NULL){ //if the next word is not null
 
@@ -450,7 +458,16 @@ tokens* lexer(char phrase[300]){
 	first_word = remove_exception_words(first_word); //we remove that words that are not needed by the parser
 
 	tokens* first_token = (tokens*)malloc(sizeof(tokens)); //we set our first token
-	first_token->next_token = NULL;
+
+	if(first_word == NULL){ //if the user typed only exception words
+
+        strcpy(first_token->words_association[0],"I don't understand");
+        first_token->next_token = NULL;
+
+        return first_token;
+
+	}
+
 	first_token = make_tokens(first_token,first_word); //we transform our words into tokens
 
 	clean_words(first_word); //remove the words typed from the memory
