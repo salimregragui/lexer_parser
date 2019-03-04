@@ -1,13 +1,3 @@
-/*********************************************************
-
-
-    Parser and Lexer By Salim Regragui
-    Code free to use in free and commercial use :)
-
-*********************************************************/
-
-#include "lexer.h"
-
 void show_list_of_actions(){ //function that shows all the actions that the user can do
 
     printf("\nHERE IS A LIST OF ALL THE ACTIONS AVAILABLE : \n");
@@ -162,27 +152,4 @@ void parser(tokens* first_token){
 
 	clean_tokens(first_token);
 
-}
-
-int main()
-{
-    char phrase[300];
-    tokens* first_token;
-    int keep_parsing = 0;
-
-	do {
-        system("cls");
-        printf("What do you want to do ? ");
-        gets(phrase);
-        first_token = lexer(phrase);
-        printf("\nRESPONSE OF THE PARSER : \n\n");
-        parser(first_token);
-
-        printf("\nWant to parse another phrase (type 1 if yes) ? ");
-        scanf("%d",&keep_parsing);
-        fflush(stdin);
-
-	}while(keep_parsing == 1);
-
-    return 0;
 }

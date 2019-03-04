@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1551714484 source:c:\users\salim\desktop\lexer_and_parser\lexer.c
+	"lexer.h"
+
+1551714496 c:\users\salim\desktop\lexer_and_parser\lexer.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"constants.h"
+
+1551713963 source:c:\users\salim\desktop\lexer_and_parser\parser.c
+
+1551714096 c:\users\salim\desktop\lexer_and_parser\constants.c
+
+1551714096 source:c:\users\salim\desktop\lexer_and_parser\constants.c
+
+1551714428 c:\users\salim\desktop\lexer_and_parser\constants.h
+
+1551714499 source:c:\users\salim\desktop\lexer_and_parser\main.c
+	"lexer.h"
+
